@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import Profile from './screens/Profile';
 import ListaDeProdutos from './screens/ListaDeProdutos';
+import Login from './screens/Login';
 
 
 const stack = createStackNavigator()
@@ -13,7 +14,7 @@ export default function App() {
   return (
     <NavigationContainer>
     <stack.Navigator initialRouteName="Login">
-        
+        <stack.Screen name="Login" component={Login}></stack.Screen>
         <stack.Screen name="Profile" component={Profile}></stack.Screen>
         <stack.Screen name="ListaDeProdutos" component={ListaDeProdutos}></stack.Screen>
     </stack.Navigator>
