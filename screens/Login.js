@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Button, FlatList, Modal, StyleSheet, Pressable, TextInput } from 'react-native';
+import { View, Text, Button, FlatList, Modal, StyleSheet, Pressable, TextInput, ActivityIndicator } from 'react-native';
 import db from '../db';
 import styles from '../Styles';
 import { hash, compare, genSalt } from 'bcryptjs'
@@ -13,21 +13,34 @@ export default function Login({ navigation }) {
   const [senhaLogin, setSenhaLogin] = useState('')
   const saltRounds = 10;
   const [modalVisible, setModalVisible] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+
+  const loading = () => {
+    setTimeout(function () {
+      setIsLoading(false)
+    }, 1000)
+  }
 
   const authenticate = async () => {
+    setIsLoading(true)
     try {
       let users = await db.users.where("email").equalsIgnoreCase(emailLogin).toArray()
       if (users.length > 0) {
         compare(senhaLogin, users[0].senha, function (err, result) {
 
           if (result == true) {
-            navigation.navigate('Profile')
+            setSenhaLogin('')
+            setEmailLogin('')
+            navigation.navigate('ListaDeProdutos')
           } else {
             alert('usuario ou senha invalido')
+            loading()
           }
         })
       } else {
         alert('usuario ou senha invalido')
+        loading()
       }
 
     } catch (e) {
@@ -58,9 +71,16 @@ export default function Login({ navigation }) {
     }
   }
 
+  loading()
 
   return (
     <View>
+      {isLoading && (
+        <View style={[styles_login.container, styles_login.horizontal]}>
+
+          <ActivityIndicator size="large" color="#00ff00" />
+        </View>
+      )}
       <Modal
         animationType="slide"
         transparent={true}
@@ -78,15 +98,18 @@ export default function Login({ navigation }) {
             <TextInput value={email} onChangeText={setEmail} style={styles.input}></TextInput>
             <Text style={styles.modalText}>Senha</Text>
             <TextInput value={senha} onChangeText={setSenha} style={styles.input} secureTextEntry></TextInput>
-            <Pressable style={styles.button} onPress={salvarUsuario}>
-              <Text>Salvaar</Text>
-            </Pressable>
 
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>Voltar</Text>
-            </Pressable>
+            <View style={styles_login.row}>
+              <Pressable style={styles.button} onPress={salvarUsuario}>
+                <Text>Salvaar</Text>
+              </Pressable>
+
+              <Pressable
+                style={[ styles.button]}
+                onPress={() => setModalVisible(!modalVisible)}>
+                <Text style={styles.textStyle}>Voltar</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>
@@ -112,3 +135,21 @@ export default function Login({ navigation }) {
     </View>
   );
 }
+
+
+const styles_login = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  row: {
+    flex: 1,
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+  },
+});
