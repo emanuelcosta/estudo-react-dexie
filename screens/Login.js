@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, Button, FlatList, Modal, StyleSheet, Pressable, TextInput } from 'react-native';
 import db from '../db';
 import styles from '../Styles';
-import {hash, compare} from 'bcrypt'
+import { hash, compare, genSalt } from 'bcryptjs'
 
 export default function Login({ navigation }) {
 
-  const [nome,setNome] = useState('')
+  const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [emailLogin, setEmailLogin] = useState('')
@@ -17,15 +17,17 @@ export default function Login({ navigation }) {
   const authenticate = async () => {
     try {
       let users = await db.users.where("email").equalsIgnoreCase(emailLogin).toArray()
-      alert(users.length)
-      if(users.length > 0){
-        compare(users[0]['senha'], function(err, result){
-          if(result == true){
-            alert('logado')
-          }else{
+      if (users.length > 0) {
+        compare(senhaLogin, users[0].senha, function (err, result) {
+
+          if (result == true) {
+            navigation.navigate('Profile')
+          } else {
             alert('usuario ou senha invalido')
           }
         })
+      } else {
+        alert('usuario ou senha invalido')
       }
 
     } catch (e) {
@@ -35,25 +37,17 @@ export default function Login({ navigation }) {
 
   const salvarUsuario = async () => {
     try {
-
-      const bcrypt = require('bcrypt');
-      const saltRounds = 10;
-      const myPlaintextPassword = 's0/\/\P4$$w0rD';
-      const someOtherPlaintextPassword = 'not_bacon';
-
-      bcrypt.genSalt(saltRounds, function(err, salt) {
-        bcrypt.hash(myPlaintextPassword, salt, function(err, hash) {
-            // Store hash in your password DB.
-            alert(hash)
+      const saltRounds = 12;
+      genSalt(saltRounds, function (err, salt) {
+        hash(senha, salt, async function (err, hash) {
+          // Store hash in your password DB.
+          await db.users.add({
+            nome,
+            email,
+            senha: hash
+          });
         });
-    });
-
-      await db.users.add({
-        nome,
-        email,
-        senha
       });
-
 
       setNome('')
       setEmail('')
@@ -78,9 +72,9 @@ export default function Login({ navigation }) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
 
-          <Text style={styles.modalText}>Nome</Text>
-          <TextInput value={nome} onChangeText={setNome} style={styles.input}></TextInput>
-          <Text style={styles.modalText}>Email</Text>
+            <Text style={styles.modalText}>Nome</Text>
+            <TextInput value={nome} onChangeText={setNome} style={styles.input}></TextInput>
+            <Text style={styles.modalText}>Email</Text>
             <TextInput value={email} onChangeText={setEmail} style={styles.input}></TextInput>
             <Text style={styles.modalText}>Senha</Text>
             <TextInput value={senha} onChangeText={setSenha} style={styles.input} secureTextEntry></TextInput>
