@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
     justifyContent: 'center',
@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 2,
+    width: 100
   },
   buttonOpen: {
     backgroundColor: '#F194FF',
@@ -50,4 +51,21 @@ const styles = StyleSheet.create({
   },
 });
 
-export default styles;
+export const styles_login = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  row: {
+    flex: 1,
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+  },
+});
+
+ styles;
